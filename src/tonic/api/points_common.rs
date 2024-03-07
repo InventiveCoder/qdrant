@@ -1366,6 +1366,7 @@ pub async fn scroll(
     toc: &TableOfContent,
     scroll_points: ScrollPoints,
     shard_selection: Option<ShardId>,
+    claims: Option<Claims>,
 ) -> Result<Response<ScrollResponse>, Status> {
     let ScrollPoints {
         collection_name,
@@ -1401,6 +1402,7 @@ pub async fn scroll(
         scroll_request,
         read_consistency,
         shard_selector,
+        claims,
     )
     .await
     .map_err(error_to_status)?;
