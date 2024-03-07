@@ -97,6 +97,7 @@ async fn search_point_groups(
     collection: Path<CollectionPath>,
     request: Json<SearchGroupsRequest>,
     params: Query<ReadParams>,
+    ActixClaims(claims): ActixClaims,
 ) -> impl Responder {
     let timing = Instant::now();
 
@@ -116,6 +117,7 @@ async fn search_point_groups(
         search_group_request,
         params.consistency,
         shard_selection,
+        claims,
         params.timeout(),
     )
     .await;
