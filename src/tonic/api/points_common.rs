@@ -1409,6 +1409,7 @@ pub async fn count(
     toc: &TableOfContent,
     count_points: CountPoints,
     shard_selection: Option<ShardId>,
+    claims: Option<Claims>,
 ) -> Result<Response<CountResponse>, Status> {
     let CountPoints {
         collection_name,
@@ -1434,6 +1435,7 @@ pub async fn count(
         count_request,
         read_consistency,
         shard_selector,
+        claims,
     )
     .await
     .map_err(error_to_status)?;
