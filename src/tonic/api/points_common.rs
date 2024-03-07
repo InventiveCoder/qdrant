@@ -1287,6 +1287,7 @@ pub async fn recommend_groups(
 pub async fn discover(
     toc: &TableOfContent,
     discover_points: DiscoverPoints,
+    claims: Option<Claims>,
 ) -> Result<Response<DiscoverResponse>, Status> {
     let (request, collection_name, read_consistency, timeout, shard_key_selector) =
         try_discover_request_from_grpc(discover_points)?;
@@ -1301,6 +1302,7 @@ pub async fn discover(
             request,
             read_consistency,
             shard_selector,
+            claims,
             timeout,
         )
         .await
@@ -1322,6 +1324,7 @@ pub async fn discover_batch(
     collection_name: String,
     discover_points: Vec<DiscoverPoints>,
     read_consistency: Option<ReadConsistencyGrpc>,
+    claims: Option<Claims>,
     timeout: Option<Duration>,
 ) -> Result<Response<DiscoverBatchResponse>, Status> {
     let mut requests = Vec::with_capacity(discover_points.len());
@@ -1337,7 +1340,13 @@ pub async fn discover_batch(
 
     let timing = Instant::now();
     let scored_points = toc
-        .discover_batch(&collection_name, requests, read_consistency, timeout)
+        .discover_batch(
+            &collection_name,
+            requests,
+            read_consistency,
+            claims,
+            timeout,
+        )
         .await
         .map_err(error_to_status)?;
 
