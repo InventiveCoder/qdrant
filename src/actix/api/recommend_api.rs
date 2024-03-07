@@ -8,12 +8,14 @@ use collection::operations::shard_selector_internal::ShardSelectorInternal;
 use collection::operations::types::{
     RecommendGroupsRequest, RecommendRequest, RecommendRequestBatch,
 };
+use rbac::jwt::Claims;
 use segment::types::ScoredPoint;
 use storage::content_manager::errors::StorageError;
 use storage::content_manager::toc::TableOfContent;
 
 use super::read_params::ReadParams;
 use super::CollectionPath;
+use crate::actix::auth::ActixClaims;
 use crate::actix::helpers::process_response;
 
 #[post("/collections/{name}/points/recommend")]
@@ -22,6 +24,7 @@ async fn recommend_points(
     collection: Path<CollectionPath>,
     request: Json<RecommendRequest>,
     params: Query<ReadParams>,
+    ActixClaims(claims): ActixClaims,
 ) -> impl Responder {
     let timing = Instant::now();
 
@@ -41,6 +44,7 @@ async fn recommend_points(
             recommend_request,
             params.consistency,
             shard_selection,
+            claims,
             params.timeout(),
         )
         .await;
@@ -53,6 +57,7 @@ async fn do_recommend_batch_points(
     collection_name: &str,
     request: RecommendRequestBatch,
     read_consistency: Option<ReadConsistency>,
+    claims: Option<Claims>,
     timeout: Option<Duration>,
 ) -> Result<Vec<Vec<ScoredPoint>>, StorageError> {
     let requests = request
@@ -68,7 +73,7 @@ async fn do_recommend_batch_points(
         })
         .collect();
 
-    toc.recommend_batch(collection_name, requests, read_consistency, timeout)
+    toc.recommend_batch(collection_name, requests, read_consistency, claims, timeout)
         .await
 }
 
@@ -78,6 +83,7 @@ async fn recommend_batch_points(
     collection: Path<CollectionPath>,
     request: Json<RecommendRequestBatch>,
     params: Query<ReadParams>,
+    ActixClaims(claims): ActixClaims,
 ) -> impl Responder {
     let timing = Instant::now();
 
@@ -86,6 +92,7 @@ async fn recommend_batch_points(
         &collection.name,
         request.into_inner(),
         params.consistency,
+        claims,
         params.timeout(),
     )
     .await;
