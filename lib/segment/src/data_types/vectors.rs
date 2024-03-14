@@ -24,7 +24,7 @@ pub enum Vector {
 pub enum VectorRef<'a> {
     Dense(&'a [VectorElementType]),
     Sparse(&'a SparseVector),
-    MultiDense(&'a MultiDenseVector),
+    MultiDense(&'a [DenseVector]),
 }
 
 impl Vector {
@@ -81,7 +81,7 @@ impl<'a> TryFrom<VectorRef<'a>> for &'a SparseVector {
     }
 }
 
-impl<'a> TryFrom<VectorRef<'a>> for &'a MultiDenseVector {
+impl<'a> TryFrom<VectorRef<'a>> for &'a [DenseVector] {
     type Error = OperationError;
 
     fn try_from(value: VectorRef<'a>) -> Result<Self, Self::Error> {
